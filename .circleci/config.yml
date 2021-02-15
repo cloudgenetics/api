@@ -1,0 +1,21 @@
+version: 2.1
+jobs:
+  build:
+    working_directory: /go/src/cloudgenetics
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - checkout
+      - run:
+          name: Get packages
+          command: |
+              go get -d
+      - run:
+          name: Build
+          command: go build -o api.go
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
