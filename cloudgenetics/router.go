@@ -4,6 +4,7 @@ import (
 	//"encoding/json"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -72,13 +73,34 @@ func setAuth0Variables() {
 // JSON Web Token middleware
 var jwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+		// Parse claims
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			return token, errors.New("invalid claims type")
+		}
+		// TODO: Workaround for https://github.com/auth0/go-jwt-middleware/issues/72
+		// https://github.com/auth0/go-jwt-middleware/issues/72#issuecomment-759421008
+		if audienceList, ok := claims["aud"].([]interface{}); ok {
+			auds := make([]string, len(audienceList))
+			for _, aud := range audienceList {
+				audStr, ok := aud.(string)
+				if !ok {
+					return token, errors.New("invalid audience type")
+				}
+				auds = append(auds, audStr)
+			}
+			claims["aud"] = auds
+		}
+
 		// Verify 'aud' claim
-		checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(auth0audience, false)
+		aud := "https://api.cloudgenetics.com"
+		checkAud := claims.VerifyAudience(aud, false)
 		if !checkAud {
+			fmt.Println(token.Claims.(jwt.MapClaims)["aud"])
 			return token, errors.New("invalid audience")
 		}
 		// Verify 'iss' claim
-		iss := "https://" + os.Getenv("AUTH0_DOMAIN") + "/"
+		iss := "https://kks32.us.auth0.com/"
 		checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 		if !checkIss {
 			return token, errors.New("invalid issuer")
@@ -139,8 +161,7 @@ func checkScope(scope string, tokenString string) bool {
 
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
-	resp, err := http.Get("https://" + auth0domain + "/.well-known/jwks.json")
-
+	resp, err := http.Get("https://kks32.us.auth0.com/.well-known/jwks.json")
 	if err != nil {
 		return cert, err
 	}
