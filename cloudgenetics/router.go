@@ -55,13 +55,14 @@ func Router() *gin.Engine {
 	// CORS middleware
 	// - Credentials share disabled
 	// - Preflight requests cached for 12 hours
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	config.AllowMethods = []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"}
-	config.AllowCredentials = true
-	config.AllowHeaders = []string{"*"}
-	r.Use(cors.New(config))
-
+	// config := cors.DefaultConfig()
+	// config.AllowOrigins = []string{"*"}
+	// config.AllowMethods = []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"}
+	// config.AllowCredentials = true
+	// config.AllowHeaders = []string{"*"}
+        // r.Use(cors.New(config))
+        r.Use(cors.Default())
+        
 	return r
 }
 
@@ -202,13 +203,19 @@ func APIV1Routes(r *gin.Engine) {
 	authorized := r.Group("/api/v1")
 	// Info on version 1 of API
 	authorized.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Cloudgenetics API Version 1")
+		c.JSON(http.StatusOK, gin.H{
+			"status":  http.StatusOK,
+			"message": string("Cloudgenetics API Version 1"),
+		})
 	})
 
 	// Anything below info should require authentication
 	authorized.Use(checkJWT())
 	// Get all projects
 	authorized.GET("/protected", func(c *gin.Context) {
-		c.String(http.StatusOK, "Cloudgenetics Protected API Version 1")
+		c.JSON(http.StatusOK, gin.H{
+			"status":  http.StatusOK,
+			"message": string("Cloudgenetics Protected API Version 1"),
+		})
 	})
 }
