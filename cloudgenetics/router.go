@@ -55,14 +55,14 @@ func Router() *gin.Engine {
 	// CORS middleware
 	// - Credentials share disabled
 	// - Preflight requests cached for 12 hours
-	// config := cors.DefaultConfig()
-	// config.AllowOrigins = []string{"*"}
-	// config.AllowMethods = []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"}
-	// config.AllowCredentials = true
-	// config.AllowHeaders = []string{"*"}
-        // r.Use(cors.New(config))
-        r.Use(cors.Default())
-        
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"}
+	config.AllowCredentials = true
+	config.AllowHeaders = []string{"*"}
+	r.Use(cors.New(config))
+	// r.Use(cors.Default())
+
 	return r
 }
 
@@ -189,6 +189,12 @@ func getPemCert(token *jwt.Token) (string, error) {
 	return cert, nil
 }
 
+// userid returns userid from JWT auth token
+func userid(c *gin.Context) string {
+	// Get token from http request, parse JWT to get "sub" (user id)
+	return c.Request.Context().Value("user").(*jwt.Token).Claims.(jwt.MapClaims)["sub"].(string)
+}
+
 // PublicRoutes define available public routes
 func PublicRoutes(r *gin.Engine) {
 	unauthorized := r.Group("/")
@@ -209,13 +215,23 @@ func APIV1Routes(r *gin.Engine) {
 		})
 	})
 
-	// Anything below info should require authentication
+	// Anything below should require authentication
 	authorized.Use(checkJWT())
 	// Get all projects
 	authorized.GET("/protected", func(c *gin.Context) {
+		userid := userid(c)
 		c.JSON(http.StatusOK, gin.H{
 			"status":  http.StatusOK,
-			"message": string("Cloudgenetics Protected API Version 1"),
+			"message": string("Cloudgenetics Protected API Version 1, authenticated for: " + userid),
+		})
+	})
+
+	// Get S3 presigned URL
+	authorized.POST("/signature", func(c *gin.Context) {
+		urlS3 := presignedUrl(c)
+		c.JSON(http.StatusOK, gin.H{
+			"status":    http.StatusOK,
+			"uploadUrl": string(urlS3),
 		})
 	})
 }
