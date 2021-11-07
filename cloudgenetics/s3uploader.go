@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type FileUpload struct {
@@ -18,30 +19,29 @@ type FileUpload struct {
 	Type string `json:"mime, omitempty"`
 }
 
-func presignedUrl(c *gin.Context) string {
+func presignedUrl(c *gin.Context) (string, string) {
 
 	var file FileUpload
 	c.BindJSON(&file)
-	log.Println(file.Name, file.Type)
-	// Initialize a session in us-west-2 that the SDK will use to load
-	// credentials from the shared credentials file ~/.aws/credentials.
+	// Initialize a session the SDK will use credentials in
+	// ~/.aws/credentials.
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1")},
 	)
 
 	// Create S3 service client
 	svc := s3.New(sess)
-
+	bucket := "presigned-uploader"
+	datsetid := uuid.New().String()
+	filename := datsetid + "/" + file.Name
 	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
-		Bucket: aws.String("presigned-uploader"),
-		Key:    aws.String(file.Name),
+		Bucket: aws.String(bucket),
+		Key:    aws.String(filename),
 	})
-	urlStr, err := req.Presign(15 * time.Minute)
+	url, err := req.Presign(15 * time.Minute)
 
 	if err != nil {
 		log.Println("Failed to sign request", err)
 	}
-
-	log.Println("The URL is", urlStr)
-	return urlStr
+	return datsetid, url
 }

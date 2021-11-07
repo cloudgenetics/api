@@ -228,10 +228,11 @@ func APIV1Routes(r *gin.Engine) {
 
 	// Get S3 presigned URL
 	authorized.POST("/signature", func(c *gin.Context) {
-		urlS3 := presignedUrl(c)
+		datasetid, s3url := presignedUrl(c)
 		c.JSON(http.StatusOK, gin.H{
 			"status":    http.StatusOK,
-			"uploadUrl": string(urlS3),
+			"uploadUrl": string(s3url),
+			"datasetid": string(datasetid),
 		})
 	})
 }
