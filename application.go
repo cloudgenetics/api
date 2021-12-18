@@ -8,7 +8,7 @@ func main() {
 	cloudgenetics.PublicRoutes(r)
 	cloudgenetics.APIV1Routes(r)
 
-	err := r.Run(":4000")
+	err := r.Run(":5000")
 	if err != nil {
 		panic(err)
 	}
