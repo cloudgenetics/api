@@ -1,11 +1,11 @@
 branch-defaults:
   main:
-    environment: cloudgenetics-dev
+    environment: dev-env
     group_suffix: null
 global:
-  application_name: cloudgenetics
+  application_name: dev
   branch: null
-  default_ec2_keyname: aws-eb
+  default_ec2_keyname: aws-eb-csg-test
   default_platform: Go 1 running on 64bit Amazon Linux 2
   default_region: us-east-1
   include_git_submodules: true

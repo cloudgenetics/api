@@ -18,6 +18,7 @@ import (
 var (
 	auth0audience string
 	auth0domain   string
+	apiname       string
 )
 
 // Jwks is JSON Web slices
@@ -38,7 +39,7 @@ type JSONWebKeys struct {
 // Router returns a gin HTTP engine
 func Router() *gin.Engine {
 	// Initialize Auth0 variables
-	setAuth0Variables()
+	setEnvironmentVariables()
 	// Creates a router without any middleware by default
 	r := gin.New()
 
@@ -56,19 +57,19 @@ func Router() *gin.Engine {
 	// - Credentials share disabled
 	// - Preflight requests cached for 12 hours
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
+	config.AllowOrigins = []string{os.Getenv("CORS_URL")}
 	config.AllowMethods = []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"}
-	config.AllowCredentials = true
 	config.AllowHeaders = []string{"*"}
+	config.AllowCredentials = true
 	r.Use(cors.New(config))
-	// r.Use(cors.Default())
 
 	return r
 }
 
-func setAuth0Variables() {
+func setEnvironmentVariables() {
 	auth0audience = os.Getenv("AUTH0_AUDIENCE")
 	auth0domain = os.Getenv("AUTH0_DOMAIN")
+	apiname = os.Getenv("API_NAME")
 }
 
 // JSON Web Token middleware
@@ -94,14 +95,14 @@ var jwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 		}
 
 		// Verify 'aud' claim
-		aud := "https://api.cloudgenetics.com"
+		aud := auth0audience
 		checkAud := claims.VerifyAudience(aud, false)
 		if !checkAud {
 			fmt.Println(token.Claims.(jwt.MapClaims)["aud"])
 			return token, errors.New("invalid audience")
 		}
 		// Verify 'iss' claim
-		iss := "https://kks32.us.auth0.com/"
+		iss := auth0domain
 		checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 		if !checkIss {
 			return token, errors.New("invalid issuer")
@@ -162,7 +163,7 @@ func checkScope(scope string, tokenString string) bool {
 
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
-	resp, err := http.Get("https://kks32.us.auth0.com/.well-known/jwks.json")
+	resp, err := http.Get(auth0domain + ".well-known/jwks.json")
 	if err != nil {
 		return cert, err
 	}
@@ -199,30 +200,30 @@ func userid(c *gin.Context) string {
 func PublicRoutes(r *gin.Engine) {
 	unauthorized := r.Group("/")
 	unauthorized.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Cloudgenetics API")
+		c.String(http.StatusOK, apiname+" API")
 	})
 }
 
 // APIV1Routes define API v1 private routes
 func APIV1Routes(r *gin.Engine) {
 	// Create an authorized group for API V1
-	authorized := r.Group("/api/v1")
+	authorized := r.Group("/api/v1/")
 	// Info on version 1 of API
-	authorized.GET("/", func(c *gin.Context) {
+	authorized.GET("/version", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  http.StatusOK,
-			"message": string("Cloudgenetics API Version 1"),
+			"message": string(apiname + " API Version 1"),
 		})
 	})
 
 	// Anything below should require authentication
 	authorized.Use(checkJWT())
 	// Get all projects
-	authorized.GET("/protected", func(c *gin.Context) {
+	authorized.GET("/protected/version", func(c *gin.Context) {
 		userid := userid(c)
 		c.JSON(http.StatusOK, gin.H{
 			"status":  http.StatusOK,
-			"message": string("Cloudgenetics Protected API Version 1, authenticated for: " + userid),
+			"message": string(apiname + " Protected API Version 1, authenticated for: " + userid),
 		})
 	})
 

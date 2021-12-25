@@ -11,6 +11,7 @@ go get github.com/golang-jwt/jwt@v3.2.2+incompatible
 go get github.com/google/uuid@v1.3.0
 go get github.com/mattn/go-isatty@v0.0.12
 go get github.com/ugorji/go/codec@v1.2.6
+go get github.com/joho/godotenv@v1.4.0 
 
 # build command
 GOOS=linux GOARCH=amd64 go build -o bin/application application.go
