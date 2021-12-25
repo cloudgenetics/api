@@ -6,7 +6,14 @@
 [![CodeQL](https://github.com/cloudgenetics/api/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/cloudgenetics/api/actions/workflows/codeql-analysis.yml)
 
 ## Project setup
-Set-up an [Auth0 API](https://auth0.com/docs/get-started/set-up-apis). Update the `.env` file with `AUTH0_DOMAIN` and `AUTH0_AUDIENCE` variables.
+Set-up an [Auth0 API](https://auth0.com/docs/get-started/set-up-apis). Update the `.env` file:
+
+```
+API_NAME="Cloudgenetics"
+AUTH0_DOMAIN="https://kks32.us.auth0.com/"
+AUTH0_AUDIENCE="https://api.cloudgenetics.com"
+CORS_URL="https://dev-app.cloudgenetics.com"
+```
 
 ### Installing dependencies
 ```

@@ -20,3 +20,6 @@ api
 
 # Bin
 bin/*
+
+# env file
+.env
