@@ -57,7 +57,7 @@ func Router() *gin.Engine {
 	// - Credentials share disabled
 	// - Preflight requests cached for 12 hours
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{os.Getenv("CORS_URL")}
+	config.AllowOrigins = []string{os.Getenv("APP_URL")}
 	config.AllowMethods = []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"}
 	config.AllowHeaders = []string{"*"}
 	config.AllowCredentials = true

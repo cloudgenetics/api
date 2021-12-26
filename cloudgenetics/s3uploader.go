@@ -1,6 +1,8 @@
 package cloudgenetics
 
 import (
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -25,13 +27,14 @@ func presignedUrl(c *gin.Context) (string, string) {
 	c.BindJSON(&file)
 	// Initialize a session the SDK will use credentials in
 	// ~/.aws/credentials.
+	awsregion := os.Getenv("AWS_REGION")
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
+		Region: aws.String(awsregion)},
 	)
 
 	// Create S3 service client
 	svc := s3.New(sess)
-	bucket := "presigned-uploader"
+	bucket := os.Getenv("AWS_S3_BUCKET")
 	datsetid := uuid.New().String()
 	filename := datsetid + "/" + file.Name
 	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
