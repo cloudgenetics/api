@@ -19,6 +19,8 @@ type FileUpload struct {
 	Name string `json:"name, omitempty"`
 	// Title of project
 	Type string `json:"mime, omitempty"`
+	// UUID
+	Uid string `json:"uuid, omitempty"`
 }
 
 func presignedUrl(c *gin.Context) (string, string) {
@@ -35,8 +37,12 @@ func presignedUrl(c *gin.Context) (string, string) {
 	// Create S3 service client
 	svc := s3.New(sess)
 	bucket := os.Getenv("AWS_S3_BUCKET")
-	datsetid := uuid.New().String()
-	filename := datsetid + "/" + file.Name
+	// Set UUID if not found in the request
+	datasetid := uuid.New().String()
+	if IsValidUUID(file.Uid) {
+		datasetid = file.Uid
+	}
+	filename := datasetid + "/" + file.Name
 	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
@@ -46,5 +52,10 @@ func presignedUrl(c *gin.Context) (string, string) {
 	if err != nil {
 		log.Println("Failed to sign request", err)
 	}
-	return datsetid, url
+	return datasetid, url
+}
+
+func IsValidUUID(u string) bool {
+	_, err := uuid.Parse(u)
+	return err == nil
 }
