@@ -240,9 +240,9 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 
 	// Create USER
 	authorized.POST("/user/register", func(c *gin.Context) {
-		registerUser(c)
+		msg := registerUser(c, db)
 		c.JSON(http.StatusOK, gin.H{
-			"status": http.StatusOK,
+			"msg": msg,
 		})
 	})
 }
