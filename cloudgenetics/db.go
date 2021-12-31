@@ -6,11 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/rds/rdsutils"
-	_ "github.com/lib/pq"
 
-	"github.com/jinzhu/gorm"
-	// Importing postgres dialects
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // DB postgres GORM object
@@ -18,8 +16,8 @@ type DB struct {
 	db *gorm.DB
 }
 
-// dbConfig Configure the DB connection settings
-func dbConfig() (dsn string, err error) {
+// dsn Data Source Name for DB
+func dsn() (dsn string, err error) {
 	dbName := os.Getenv("DB_NAME")
 	dbUser := os.Getenv("DB_USER")
 	dbHost := os.Getenv("DB_HOST")
@@ -38,22 +36,15 @@ func dbConfig() (dsn string, err error) {
 
 // dbConnect Connect to Postgres DB
 func Connect() (db *gorm.DB, err error) {
-	dsn, err := dbConfig()
+	dsn, err := dsn()
 	if err != nil {
 		panic(err)
 	}
-	db, dberr := gorm.Open("postgres", dsn)
+	db, dberr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if dberr != nil {
 		panic(dberr)
 	}
 
 	// Get generic database object sql.DB to use its functions
-	pingerror := db.DB().Ping()
-	if pingerror != nil {
-		db.Close()
-		panic(pingerror)
-	} else {
-		fmt.Println("Connected")
-	}
 	return db, dberr
 }

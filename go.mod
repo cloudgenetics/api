@@ -10,9 +10,9 @@ require (
 	github.com/gin-gonic/gin v1.7.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
-	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.4.0
-	github.com/lib/pq v1.10.4
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
+	gorm.io/driver/postgres v1.2.3
+	gorm.io/gorm v1.22.4
 )
