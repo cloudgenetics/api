@@ -237,4 +237,12 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 			"datasetid": string(datasetid),
 		})
 	})
+
+	// Create USER
+	authorized.POST("/user/register", func(c *gin.Context) {
+		registerUser(c)
+		c.JSON(http.StatusOK, gin.H{
+			"status": http.StatusOK,
+		})
+	})
 }

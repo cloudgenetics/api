@@ -3,6 +3,7 @@ package cloudgenetics
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/rds/rdsutils"
@@ -21,7 +22,10 @@ func dsn() (dsn string, err error) {
 	dbName := os.Getenv("DB_NAME")
 	dbUser := os.Getenv("DB_USER")
 	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
+	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		panic(err)
+	}
 	dbEndpoint := fmt.Sprintf("%s:%d", dbHost, dbPort)
 	region := os.Getenv("AWS_REGION")
 	creds := credentials.NewEnvCredentials()
@@ -44,6 +48,9 @@ func DBConnect() (db *gorm.DB, err error) {
 	if dberr != nil {
 		panic(dberr)
 	}
+
+	// Creater user table
+	db.AutoMigrate(&User{})
 
 	// Get generic database object sql.DB to use its functions
 	return db, dberr
