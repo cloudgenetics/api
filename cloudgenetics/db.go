@@ -34,8 +34,8 @@ func dsn() (dsn string, err error) {
 	return dsn, err
 }
 
-// dbConnect Connect to Postgres DB
-func Connect() (db *gorm.DB, err error) {
+// DBConnect Connect to Postgres DB
+func DBConnect() (db *gorm.DB, err error) {
 	dsn, err := dsn()
 	if err != nil {
 		panic(err)

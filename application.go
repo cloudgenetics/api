@@ -13,10 +13,17 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	// Create a database
+	db, dberr := cloudgenetics.DBConnect()
+	if dberr != nil {
+		log.Fatal("Failed to connect to database")
+		panic(dberr)
+	}
+
 	r := cloudgenetics.Router()
 
 	cloudgenetics.PublicRoutes(r)
-	cloudgenetics.APIV1Routes(r)
+	cloudgenetics.APIV1Routes(r, db)
 
 	err := r.Run(":5000")
 	if err != nil {

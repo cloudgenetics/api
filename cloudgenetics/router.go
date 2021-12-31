@@ -13,6 +13,7 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 var (
@@ -205,7 +206,7 @@ func PublicRoutes(r *gin.Engine) {
 }
 
 // APIV1Routes define API v1 private routes
-func APIV1Routes(r *gin.Engine) {
+func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 	// Create an authorized group for API V1
 	authorized := r.Group("/api/v1/")
 	// Info on version 1 of API
