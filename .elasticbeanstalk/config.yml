@@ -1,9 +1,9 @@
 branch-defaults:
   main:
-    environment: dev-env
+    environment: csgdev-env
     group_suffix: null
 global:
-  application_name: dev
+  application_name: csgdev
   branch: null
   default_ec2_keyname: aws-eb-csg-test
   default_platform: Go 1 running on 64bit Amazon Linux 2

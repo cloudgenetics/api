@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds/rdsutils"
 
 	"gorm.io/driver/postgres"
@@ -29,6 +30,10 @@ func dsn() (dsn string, err error) {
 	dbEndpoint := fmt.Sprintf("%s:%d", dbHost, dbPort)
 	region := os.Getenv("AWS_REGION")
 	creds := credentials.NewEnvCredentials()
+	if os.Getenv("DEPLOY") == "aws" {
+		sess := session.Must(session.NewSession())
+		creds = sess.Config.Credentials
+	}
 	authToken, err := rdsutils.BuildAuthToken(dbEndpoint, region, dbUser, creds)
 	if err != nil {
 		panic(err)
