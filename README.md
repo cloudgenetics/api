@@ -30,3 +30,9 @@ go build -o api
 export GIN_MODE=release
 ./api
 ```
+
+### Deploy to AWS
+```
+eb deploy
+```
+
