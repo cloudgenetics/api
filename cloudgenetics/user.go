@@ -4,18 +4,21 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 // User DB User table
 type User struct {
 	ID          uint      `gorm:"primaryKey;AUTO_INCREMENT" json:"id, omitempty"`
+	UUID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
 	Name        string    `json: "name"`
 	Email       string    `json: "email"`
 	Userid      string    `gorm:"unique_index" json: "userid"`
 	EmailVerify bool      `json: "email_verify"`
 	UpdatedAt   time.Time `json: "updated_at"`
 	Role        uint      `json: "role, omitentry"`
+	Active      bool      `gorm: "default:true"`
 }
 
 // registerUser Register a new user in DB

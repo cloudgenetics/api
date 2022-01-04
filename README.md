@@ -12,7 +12,14 @@ Set-up an [Auth0 API](https://auth0.com/docs/get-started/set-up-apis). Update th
 API_NAME="Cloudgenetics"
 AUTH0_DOMAIN="https://kks32.us.auth0.com/"
 AUTH0_AUDIENCE="https://api.cloudgenetics.com"
-CORS_URL="https://dev-app.cloudgenetics.com"
+AWS_REGION="us-east-1"
+#APP_URL="https://dev-app.csgcompute.com"
+APP_URL="*"
+AWS_S3_BUCKET="csg-dev-data"
+DB_NAME="dbname"
+DB_USER="dev"
+DB_HOST="dbname.randomcode.<region>.rds.amazonaws.com"
+DB_PORT=5432
 ```
 
 ### Installing dependencies
@@ -22,13 +29,15 @@ go get -d
 
 ### Compile and run
 ```
-go build -o api
+GOOS=linux GOARCH=amd64 go build -o bin/application application.go
 ```
 
 ### Serve api
 ```
 export GIN_MODE=release
-./api
+export AWS_ACCESS_KEY_ID=<aws-id>
+export AWS_SECRET_KEY=<aws-key>
+./bin/application
 ```
 
 ### Deploy to AWS
