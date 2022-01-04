@@ -49,8 +49,10 @@ func DBConnect() (db *gorm.DB, err error) {
 		panic(dberr)
 	}
 
-	// Creater user table
+	// Auto migratate tables
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&File{})
+	db.AutoMigrate(&Dataset{})
 
 	// Get generic database object sql.DB to use its functions
 	return db, dberr
