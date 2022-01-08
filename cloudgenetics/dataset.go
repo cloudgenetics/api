@@ -29,14 +29,23 @@ type DatasetFile struct {
 	DeletedAt gorm.DeletedAt
 }
 
-func createDataset(c *gin.Context, db *gorm.DB) string {
+type DatasetName struct {
+	Name string `json: "datasetname"`
+}
+
+func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	var ds Dataset
 	// Fetch userid
 	user_id := userid(c)
 	// Find user primary key ID
 	var user User
 	db.Where(&User{Userid: user_id}).First(&user)
+	// Get name of dataset
+	var dsname DatasetName
+	c.BindJSON(&dsname)
+
 	datasetid := uuid.New()
+	ds.Name = dsname.Name
 	ds.UID = datasetid
 	ds.Owner = user.ID
 	ds.UpdatedAt = time.Now()
@@ -46,5 +55,5 @@ func createDataset(c *gin.Context, db *gorm.DB) string {
 	if dbresp.Error != nil {
 		log.Print("Generate Datset: ", dbresp.Error)
 	}
-	return datasetid.String()
+	return datasetid
 }
