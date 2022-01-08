@@ -228,9 +228,19 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		})
 	})
 
+	// Get DataSet id
+	authorized.GET("/dataset/new", func(c *gin.Context) {
+		datasetid := createDataset(c, db)
+		c.JSON(http.StatusOK, gin.H{
+			"status":    http.StatusOK,
+			"datasetid": datasetid,
+		})
+	})
+
 	// Get S3 presigned URL
 	authorized.POST("/presignedurl", func(c *gin.Context) {
-		datasetid, s3url := presignedUrl(c)
+		datasetid, s3url := presignedUrl(c, db)
+		fmt.Println("URL: ", s3url)
 		c.JSON(http.StatusOK, gin.H{
 			"status":    http.StatusOK,
 			"uploadUrl": string(s3url),

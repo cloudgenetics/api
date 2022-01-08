@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"gorm.io/gorm"
 
 	"log"
 	"time"
@@ -23,7 +24,7 @@ type FileUpload struct {
 	Uid string `json:"uuid, omitempty"`
 }
 
-func presignedUrl(c *gin.Context) (string, string) {
+func presignedUrl(c *gin.Context, db *gorm.DB) (string, string) {
 
 	var file FileUpload
 	c.BindJSON(&file)

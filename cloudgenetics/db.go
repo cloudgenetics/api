@@ -53,6 +53,10 @@ func DBConnect() (db *gorm.DB, err error) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&File{})
 	db.AutoMigrate(&Dataset{})
+	joinerr := db.SetupJoinTable(&Dataset{}, "Files", &DatasetFile{})
+	if joinerr != nil {
+		panic(joinerr)
+	}
 
 	// Get generic database object sql.DB to use its functions
 	return db, dberr
