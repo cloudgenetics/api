@@ -30,19 +30,20 @@ type DatasetFile struct {
 }
 
 type DatasetName struct {
-	Name string `json: "datasetname"`
+	Name string `json: "name"`
 }
 
 func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
+	// Get name of dataset
+	var dsname DatasetName
+	c.BindJSON(&dsname)
+
 	var ds Dataset
 	// Fetch userid
 	user_id := userid(c)
 	// Find user primary key ID
 	var user User
 	db.Where(&User{Userid: user_id}).First(&user)
-	// Get name of dataset
-	var dsname DatasetName
-	c.BindJSON(&dsname)
 
 	datasetid := uuid.New()
 	ds.Name = dsname.Name
