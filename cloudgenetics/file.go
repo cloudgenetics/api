@@ -19,15 +19,16 @@ type File struct {
 	Owner     uuid.UUID `json:"omitempty"`
 	CreatedAt int64     `gorm:"autoCreateTime" json:"omitempty"`
 	Status    bool      `json:"status"`
-	DatasetID uuid.UUID `gorm:"uniqueIndex;type:uuid" json:"datasetid"`
+	DatasetID uuid.UUID `gorm:"type:uuid" json:"datasetid"`
 	Dataset   Dataset   `gorm:"foreignKey:DatasetID"`
 }
 
 func addFileToDataSet(c *gin.Context, db *gorm.DB) {
 	var file File
 	c.BindJSON(&file)
+	file.Owner = userid(c, db)
 	dbresp := db.Create(&file)
 	if dbresp.Error != nil {
-		log.Print("Add file: ", dbresp.Error)
+		log.Print("Add file to dataset: ", dbresp.Error)
 	}
 }

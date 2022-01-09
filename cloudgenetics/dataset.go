@@ -1,6 +1,7 @@
 package cloudgenetics
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -18,7 +19,7 @@ type Dataset struct {
 	UpdatedAt time.Time `json:"omitempty"`
 	Status    bool      `gorm:"type:boolean;default:true" json:"omitempty"`
 	Share     uint      `gorm:"type:uint;default:0" json:"omitempty"`
-	OwnerID   uuid.UUID `gorm:"uniqueIndex;type:uint" json:"omitempty"`
+	OwnerID   uuid.UUID `gorm:"type:uint" json:"omitempty"`
 	User      User      `gorm:"foreignKey:OwnerID"`
 }
 
@@ -35,5 +36,6 @@ func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	if dbresp.Error != nil {
 		log.Print("Generate Datset: ", dbresp.Error)
 	}
+	fmt.Println("Datasetid: ", ds.ID)
 	return ds.ID
 }

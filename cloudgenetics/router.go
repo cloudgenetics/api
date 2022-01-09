@@ -241,6 +241,12 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		})
 	})
 
+	// Upload file
+	authorized.POST("/dataset/uploadfile", func(c *gin.Context) {
+		addFileToDataSet(c, db)
+		c.Status(http.StatusOK)
+	})
+
 	// Create USER
 	authorized.POST("/user/register", func(c *gin.Context) {
 		msg := registerUser(c, db)

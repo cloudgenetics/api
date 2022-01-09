@@ -21,7 +21,7 @@ type FileUpload struct {
 	// Title of project
 	Type string `json:"mime, omitempty"`
 	// UUID
-	Uid string `json:"uuid, omitempty"`
+	UUID string `json:"uuid, omitempty"`
 }
 
 func presignedUrl(c *gin.Context, db *gorm.DB) (string, string) {
@@ -39,10 +39,7 @@ func presignedUrl(c *gin.Context, db *gorm.DB) (string, string) {
 	svc := s3.New(sess)
 	bucket := os.Getenv("AWS_S3_BUCKET")
 	// Set UUID if not found in the request
-	datasetid := uuid.New().String()
-	if IsValidUUID(file.Uid) {
-		datasetid = file.Uid
-	}
+	datasetid := file.UUID
 	filename := datasetid + "/" + file.Name
 	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(bucket),
