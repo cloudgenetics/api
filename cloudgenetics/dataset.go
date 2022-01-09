@@ -13,12 +13,13 @@ import (
 type Dataset struct {
 	gorm.Model
 	ID        uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"omitempty"`
-	Name      string    `json: "name"`
-	Owner     uuid.UUID `json: "omitempty"`
-	CreatedAt int64     `gorm: "autoCreateTime" json: "omitempty"`
-	UpdatedAt time.Time `json: "omitempty"`
-	Status    bool      `gorm: "type:boolean;default:true" json: "omitempty"`
-	Share     uint      `gorm: "type:uint;default:0" json: "omitempty"`
+	Name      string    `json:"name"`
+	CreatedAt int64     `gorm:"autoCreateTime" json:"omitempty"`
+	UpdatedAt time.Time `json:"omitempty"`
+	Status    bool      `gorm:"type:boolean;default:true" json:"omitempty"`
+	Share     uint      `gorm:"type:uint;default:0" json:"omitempty"`
+	OwnerID   uuid.UUID `gorm:"uniqueIndex;type:uint" json:"omitempty"`
+	User      User      `gorm:"foreignKey:OwnerID"`
 }
 
 func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
@@ -26,17 +27,11 @@ func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	var ds Dataset
 	c.BindJSON(&ds)
 
-	// Fetch userid
-	user_id := authid(c)
-	// Find user primary key ID
-	var user User
-	db.Where(&User{Userid: user_id}).First(&user)
-
-	ds.Owner = user.ID
+	ds.OwnerID = userid(c, db)
 	ds.UpdatedAt = time.Now()
 	ds.Status = true
 
-	dbresp := db.Create(&ds)
+	dbresp := db.Save(&ds)
 	if dbresp.Error != nil {
 		log.Print("Generate Datset: ", dbresp.Error)
 	}
