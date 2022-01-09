@@ -8,13 +8,14 @@ import (
 // File DB with datafile info
 type File struct {
 	gorm.Model
-	ID        uint64    `gorm:"primaryKey;AUTO_INCREMENT" json:"id, omitempty"`
-	UID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
+	ID        uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"omitempty"`
 	Name      string    `json: "name"`
 	Size      uint      `json: "size"`
-	FileType  string
-	Loc       string
-	Owner     uint
-	CreatedAt int64 `gorm:"autoCreateTime"`
-	Status    bool
+	FileType  string    `json: "type"`
+	Url       string    `json: "url"`
+	Owner     uint      `json:"omitempty"`
+	CreatedAt int64     `gorm:"autoCreateTime" json:"omitempty"`
+	Status    bool      `json: "status"`
+	DatasetID uuid.UUID `gorm: "uniqueIndex;type:uuid" json: "datasetid"`
+	Dataset   Dataset   `gorm:"foreignKey:DatasetID"`
 }

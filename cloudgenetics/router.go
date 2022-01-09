@@ -191,12 +191,6 @@ func getPemCert(token *jwt.Token) (string, error) {
 	return cert, nil
 }
 
-// userid returns userid from JWT auth token
-func userid(c *gin.Context) string {
-	// Get token from http request, parse JWT to get "sub" (user id)
-	return c.Request.Context().Value("user").(*jwt.Token).Claims.(jwt.MapClaims)["sub"].(string)
-}
-
 // PublicRoutes define available public routes
 func PublicRoutes(r *gin.Engine) {
 	unauthorized := r.Group("/")
@@ -221,7 +215,7 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 	authorized.Use(checkJWT())
 	// Get all projects
 	authorized.GET("/protected/version", func(c *gin.Context) {
-		userid := userid(c)
+		userid := authid(c)
 		c.JSON(http.StatusOK, gin.H{
 			"status":  http.StatusOK,
 			"message": string(apiname + " Protected API Version 1, authenticated for: " + userid),

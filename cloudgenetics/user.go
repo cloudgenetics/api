@@ -3,6 +3,7 @@ package cloudgenetics
 import (
 	"time"
 
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -10,11 +11,10 @@ import (
 
 // User DB User table
 type User struct {
-	ID          uint      `gorm:"primaryKey;AUTO_INCREMENT" json:"id, omitempty"`
-	UUID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
+	ID          uuid.UUID `gorm: "primaryKey;type:uuid;default:uuid_generate_v4()"`
 	Name        string    `json: "name"`
 	Email       string    `json: "email"`
-	Userid      string    `gorm:"unique_index" json: "userid"`
+	Userid      string    `gorm: "unique_index" json: "userid"`
 	EmailVerify bool      `json: "email_verify"`
 	UpdatedAt   time.Time `json: "updated_at"`
 	Role        uint      `json: "role, omitentry"`
@@ -27,7 +27,7 @@ func registerUser(c *gin.Context, db *gorm.DB) string {
 	var user User
 
 	// Fetch userid from authentication
-	userid := userid(c)
+	userid := authid(c)
 	if err := c.BindJSON(&user); err != nil {
 		return "JSON bind failed"
 	}
@@ -51,4 +51,19 @@ func registerUser(c *gin.Context, db *gorm.DB) string {
 	} else {
 		return "Invalid userid, id doesn't match"
 	}
+}
+
+// authid returns userid from JWT auth token
+func authid(c *gin.Context) string {
+	// Get token from http request, parse JWT to get "sub" (user id)
+	return c.Request.Context().Value("user").(*jwt.Token).Claims.(jwt.MapClaims)["sub"].(string)
+}
+
+func useruuid(c *gin.Context, db *gorm.DB) uuid.UUID {
+	// Fetch userid
+	user_id := authid(c)
+	// Find user primary key ID
+	var user User
+	db.Where(&User{Userid: user_id}).First(&user)
+	return user.ID
 }

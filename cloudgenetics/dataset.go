@@ -12,42 +12,26 @@ import (
 // Dataset DB with dataset
 type Dataset struct {
 	gorm.Model
-	ID        uint64    `gorm:"primaryKey;AUTO_INCREMENT" json:"id, omitempty"`
-	UID       uuid.UUID `gorm:"unique_index"`
-	Name      string    `json: "name, omitentry"`
-	Owner     uint
-	CreatedAt int64     `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json: "omitentry"`
-	Status    bool      `gorm: "type:boolean;default:true"`
-	Files     []File    `gorm:"many2many:dataset_files;"`
-}
-
-type DatasetFile struct {
-	FileID    uint64 `gorm:"primaryKey"`
-	DatasetID uint64 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	DeletedAt gorm.DeletedAt
-}
-
-type DatasetName struct {
-	Name string `json: "name"`
+	ID        uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"omitempty"`
+	Name      string    `json: "name"`
+	Owner     uuid.UUID `json: "omitempty"`
+	CreatedAt int64     `gorm: "autoCreateTime" json: "omitempty"`
+	UpdatedAt time.Time `json: "omitempty"`
+	Status    bool      `gorm: "type:boolean;default:true" json: "omitempty"`
+	Share     uint      `gorm: "type:uint;default:0" json: "omitempty"`
 }
 
 func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	// Get name of dataset
-	var dsname DatasetName
-	c.BindJSON(&dsname)
-
 	var ds Dataset
+	c.BindJSON(&ds)
+
 	// Fetch userid
-	user_id := userid(c)
+	user_id := authid(c)
 	// Find user primary key ID
 	var user User
 	db.Where(&User{Userid: user_id}).First(&user)
 
-	datasetid := uuid.New()
-	ds.Name = dsname.Name
-	ds.UID = datasetid
 	ds.Owner = user.ID
 	ds.UpdatedAt = time.Now()
 	ds.Status = true
@@ -56,5 +40,5 @@ func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	if dbresp.Error != nil {
 		log.Print("Generate Datset: ", dbresp.Error)
 	}
-	return datasetid
+	return ds.ID
 }
