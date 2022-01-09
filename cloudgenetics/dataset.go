@@ -1,7 +1,6 @@
 package cloudgenetics
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -36,6 +35,5 @@ func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	if dbresp.Error != nil {
 		log.Print("Generate Datset: ", dbresp.Error)
 	}
-	fmt.Println("Datasetid: ", ds.ID)
 	return ds.ID
 }
