@@ -222,7 +222,7 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		})
 	})
 
-	// Get DataSet id
+	// New dataset
 	authorized.POST("/dataset/new", func(c *gin.Context) {
 		datasetid := createDataset(c, db)
 		c.JSON(http.StatusOK, gin.H{
@@ -245,6 +245,12 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 	authorized.POST("/dataset/uploadfile", func(c *gin.Context) {
 		addFileToDataSet(c, db)
 		c.Status(http.StatusOK)
+	})
+
+	// All dataset for user
+	authorized.GET("/datasets", func(c *gin.Context) {
+		ds := listDatasets(c, db)
+		c.JSON(http.StatusOK, ds)
 	})
 
 	// Create USER
