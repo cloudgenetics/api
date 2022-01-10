@@ -42,6 +42,15 @@ func listDatasets(c *gin.Context, db *gorm.DB) []Dataset {
 	var datasets []Dataset
 	userid := userid(c, db)
 	db.Find(&datasets, Dataset{OwnerID: userid})
-	log.Println("Datasets: ", datasets)
 	return datasets
+}
+
+func getDataset(c *gin.Context, db *gorm.DB) Dataset {
+	var ds Dataset
+	dbid, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		log.Print("Get dataset: ", err)
+	}
+	db.First(&ds, Dataset{ID: dbid})
+	return ds
 }

@@ -247,10 +247,22 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		c.Status(http.StatusOK)
 	})
 
+	// Get dataset info
+	authorized.GET("/dataset/:uuid", func(c *gin.Context) {
+		ds := getDataset(c, db)
+		c.JSON(http.StatusOK, ds)
+	})
+
 	// All dataset for user
 	authorized.GET("/datasets", func(c *gin.Context) {
 		ds := listDatasets(c, db)
 		c.JSON(http.StatusOK, ds)
+	})
+
+	// Get files in a dataset
+	authorized.GET("/datasets/:uuid", func(c *gin.Context) {
+		files := getFilesDataset(c, db)
+		c.JSON(http.StatusOK, files)
 	})
 
 	// Create USER

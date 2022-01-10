@@ -17,7 +17,7 @@ type File struct {
 	FileType  string    `json:"type"`
 	Url       string    `json:"url"`
 	Owner     uuid.UUID `json:"omitempty"`
-	CreatedAt int64     `gorm:"autoCreateTime" json:"omitempty"`
+	CreatedAt int64     `gorm:"autoCreateTime" json:"created_at,omitempty"`
 	Status    bool      `json:"status"`
 	DatasetID uuid.UUID `gorm:"type:uuid" json:"datasetid"`
 	Dataset   Dataset   `gorm:"foreignKey:DatasetID"`
@@ -31,4 +31,14 @@ func addFileToDataSet(c *gin.Context, db *gorm.DB) {
 	if dbresp.Error != nil {
 		log.Print("Add file to dataset: ", dbresp.Error)
 	}
+}
+
+func getFilesDataset(c *gin.Context, db *gorm.DB) []File {
+	var files []File
+	dbid, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		log.Print("Get files dataset: ", err)
+	}
+	db.Find(&files, File{DatasetID: dbid})
+	return files
 }
