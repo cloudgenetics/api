@@ -1,7 +1,6 @@
 package cloudgenetics
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -43,7 +42,6 @@ func basespace_s3upload(bsaccount Basespace) []File {
 	if err != nil {
 		log.Println("Json Marshalling error")
 	}
-	fmt.Println("Payload: ", string(payload))
 
 	result, err := client.Invoke(&lambda.InvokeInput{
 		FunctionName:   aws.String("basespace-s3"),
@@ -63,7 +61,6 @@ func basespace_s3upload(bsaccount Basespace) []File {
 	var files []File
 	if resp.Status == 200 {
 		fileString := resp.Files
-		fmt.Println(fileString)
 		jerr := json.Unmarshal([]byte(fileString), &files)
 		if jerr != nil {
 			log.Println(jerr)
