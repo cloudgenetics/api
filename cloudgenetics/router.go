@@ -250,7 +250,7 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 	authorized.POST("/dataset/basespace", func(c *gin.Context) {
 		fetchBasespaceFiles(c, db)
 		c.JSON(http.StatusOK, gin.H{
-			"status": "Upload Basespace files to S3 in progress.",
+			"status": "Imported Basespace files.",
 		})
 	})
 
