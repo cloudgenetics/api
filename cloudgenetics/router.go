@@ -1,7 +1,6 @@
 package cloudgenetics
 
 import (
-	//"encoding/json"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -245,6 +244,14 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 	authorized.POST("/dataset/uploadfile", func(c *gin.Context) {
 		addFileToDataSet(c, db)
 		c.Status(http.StatusOK)
+	})
+
+	// Fetch Basespace files and upload to S3
+	authorized.POST("/dataset/basespace", func(c *gin.Context) {
+		fetchBasespaceFiles(c, db)
+		c.JSON(http.StatusOK, gin.H{
+			"status": "Upload Basespace files to S3 in progress.",
+		})
 	})
 
 	// Get dataset info

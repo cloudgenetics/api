@@ -2,6 +2,7 @@ package cloudgenetics
 
 import (
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,7 +15,7 @@ type File struct {
 	ID        uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"omitempty"`
 	Name      string    `json:"name"`
 	Size      uint      `json:"size"`
-	FileType  string    `json:"type"`
+	FileType  string    `json:"type,omitempty"`
 	Url       string    `json:"url"`
 	Owner     uuid.UUID `json:"omitempty"`
 	CreatedAt int64     `gorm:"autoCreateTime" json:"created_at,omitempty"`
@@ -30,6 +31,34 @@ func addFileToDataSet(c *gin.Context, db *gorm.DB) {
 	dbresp := db.Create(&file)
 	if dbresp.Error != nil {
 		log.Print("Add file to dataset: ", dbresp.Error)
+	}
+}
+
+func fetchBasespaceFiles(c *gin.Context, db *gorm.DB) {
+	// Get user id
+	owner := userid(c, db)
+	// Get Basespace account info
+	var bsaccount Basespace
+	c.BindJSON(&bsaccount)
+
+	// Create a new dataset from BS
+	ds := Dataset{
+		Name:      "BaseSpaceProject: " + bsaccount.Projectid,
+		OwnerID:   owner,
+		UpdatedAt: time.Now(),
+		Status:    true,
+	}
+	bsaccount.Uuid = addDataset(ds, db)
+
+	// Upload basespace files to S3
+	files := basespace_s3upload(bsaccount)
+	// Add uploaded files to dataset
+	for _, file := range files {
+		file.Owner = owner
+		dbresp := db.Create(&file)
+		if dbresp.Error != nil {
+			log.Print("Add Basespace file to db: ", dbresp.Error)
+		}
 	}
 }
 

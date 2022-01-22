@@ -38,6 +38,14 @@ func createDataset(c *gin.Context, db *gorm.DB) uuid.UUID {
 	return ds.ID
 }
 
+func addDataset(ds Dataset, db *gorm.DB) uuid.UUID {
+	dbresp := db.Save(&ds)
+	if dbresp.Error != nil {
+		log.Print("Add Dataset: ", dbresp.Error)
+	}
+	return ds.ID
+}
+
 func listDatasets(c *gin.Context, db *gorm.DB) []Dataset {
 	var datasets []Dataset
 	userid := userid(c, db)
