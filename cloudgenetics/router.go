@@ -272,6 +272,12 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		c.JSON(http.StatusOK, files)
 	})
 
+	// Submit job
+	authorized.POST("/job/submit", func(c *gin.Context) {
+		submitBatchJob(c, db)
+		c.Status(http.StatusOK)
+	})
+
 	// Create USER
 	authorized.POST("/user/register", func(c *gin.Context) {
 		msg := registerUser(c, db)
