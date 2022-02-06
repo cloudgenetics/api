@@ -1,21 +1,28 @@
 package cloudgenetics
 
 import (
-	"fmt"
+	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/batch"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type BatchJob struct {
-	JobDefinition    string   `json:"jobDefinition"`
-	JobName          string   `json:"jobName"`
-	JobQueue         string   `json:"jobQueue"`
-	NextflowPipeline string   `json:"nextflowPipeline"`
-	ContainerCommand []string `json:"containerCommand,omitempty"`
+type Job struct {
+	gorm.Model
+	ID               uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"uuid,omitempty"`
+	JobDefinition    string    `json:"jobDefinition"`
+	JobName          string    `json:"jobName"`
+	JobArn           string    `json:"jobArn,omitempty"`
+	JobQueue         string    `json:"jobQueue"`
+	NextflowPipeline string    `json:"nextflowPipeline"`
+	ContainerCommand []string  `gorm:"-" json:"containerCommand,omitempty"`
+	Command          string    `json:"Command,omitempty"`
+	Outdir           string    `json:"outDir,omitempty"`
 }
 
 type JobDetails struct {
@@ -24,11 +31,16 @@ type JobDetails struct {
 	JobName string `json:"jobName"`
 }
 
-func jobParameters(job BatchJob) *batch.SubmitJobInput {
+func jobParameters(job *Job) *batch.SubmitJobInput {
 	commands := []*string{}
 	commands = append(commands, aws.String(job.NextflowPipeline))
+	outdir := "s3://" + os.Getenv("AWS_S3_BUCKET") + "/" + uuid.NewString()
+	job.Outdir = outdir
+	commands = append(commands, aws.String("--outdir"))
+	commands = append(commands, aws.String(outdir))
 	for _, cmd := range job.ContainerCommand {
 		commands = append(commands, aws.String(cmd))
+		job.Command = job.Command + "," + cmd
 	}
 
 	input := &batch.SubmitJobInput{
@@ -43,21 +55,26 @@ func jobParameters(job BatchJob) *batch.SubmitJobInput {
 	return input
 }
 
-func submitJob(input *batch.SubmitJobInput) {
+func submitJob(input *batch.SubmitJobInput) string {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	svc := batch.New(sess, &aws.Config{Region: aws.String("us-east-2")})
 	result, err := svc.SubmitJob(input)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print("Submit job: ", err.Error())
 	}
-	fmt.Println(result)
+	job_arn := *result.JobArn
+	return job_arn
 }
 
 func submitBatchJob(c *gin.Context, db *gorm.DB) {
-	var job BatchJob
+	var job Job
 	c.BindJSON(&job)
-	params := jobParameters(job)
-	submitJob(params)
+	params := jobParameters(&job)
+	job.JobArn = submitJob(params)
+	dbresp := db.Save(&job)
+	if dbresp.Error != nil {
+		log.Print("Create job: ", dbresp.Error)
+	}
 }

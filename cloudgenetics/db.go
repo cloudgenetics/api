@@ -53,6 +53,7 @@ func DBConnect() (db *gorm.DB, err error) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Dataset{})
 	db.AutoMigrate(&File{})
+	db.AutoMigrate(&Job{})
 
 	// Get generic database object sql.DB to use its functions
 	return db, dberr

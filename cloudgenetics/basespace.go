@@ -2,6 +2,7 @@ package cloudgenetics
 
 import (
 	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -15,6 +16,7 @@ type Basespace struct {
 	AccessToken string    `json:"accessToken"`
 	Projectid   string    `json:"projectId"`
 	Uuid        uuid.UUID `json:"uuid,omitempty"`
+	S3Bucket    string    `json:"s3bucket,omitempty"`
 }
 
 type Response struct {
@@ -35,6 +37,7 @@ func basespace_s3upload(bsaccount Basespace) []File {
 		AccessToken: bsaccount.AccessToken,
 		Projectid:   bsaccount.Projectid,
 		Uuid:        bsaccount.Uuid,
+		S3Bucket:    os.Getenv("AWS_S3_BUCKET"),
 	}
 
 	payload, err := json.Marshal(p)

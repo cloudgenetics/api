@@ -12,6 +12,7 @@ api
 *#*
 *.*sw*
 *~*
+.DS_Store*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
