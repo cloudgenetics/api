@@ -23,6 +23,8 @@ type Job struct {
 	ContainerCommand []string  `gorm:"-" json:"containerCommand,omitempty"`
 	Command          string    `json:"Command,omitempty"`
 	Outdir           string    `json:"outDir,omitempty"`
+	OwnerID          uuid.UUID `gorm:"type:uint" json:"omitempty"`
+	User             User      `gorm:"foreignKey:OwnerID" json:"omitempty"`
 }
 
 type JobDetails struct {
@@ -71,6 +73,7 @@ func submitJob(input *batch.SubmitJobInput) string {
 func submitBatchJob(c *gin.Context, db *gorm.DB) {
 	var job Job
 	c.BindJSON(&job)
+	job.OwnerID = userid(c, db)
 	params := jobParameters(&job)
 	job.JobArn = submitJob(params)
 	dbresp := db.Save(&job)
