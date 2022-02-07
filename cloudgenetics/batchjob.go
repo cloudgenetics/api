@@ -22,7 +22,7 @@ type Job struct {
 	NextflowPipeline string    `json:"nextflowPipeline"`
 	ContainerCommand []string  `gorm:"-" json:"containerCommand,omitempty"`
 	Command          string    `json:"Command,omitempty"`
-	Outdir           string    `json:"outDir,omitempty"`
+	ResultsDir       string    `json:"resultsDir,omitempty"`
 	OwnerID          uuid.UUID `gorm:"type:uint" json:"omitempty"`
 	User             User      `gorm:"foreignKey:OwnerID" json:"omitempty"`
 }
@@ -36,8 +36,8 @@ type JobDetails struct {
 func jobParameters(job *Job) *batch.SubmitJobInput {
 	commands := []*string{}
 	commands = append(commands, aws.String(job.NextflowPipeline))
-	outdir := "s3://" + os.Getenv("AWS_S3_BUCKET") + "/" + uuid.NewString()
-	job.Outdir = outdir
+	job.ResultsDir = uuid.NewString()
+	outdir := "s3://" + os.Getenv("AWS_S3_BUCKET") + "/" + job.ResultsDir
 	commands = append(commands, aws.String("--outdir"))
 	commands = append(commands, aws.String(outdir))
 	for _, cmd := range job.ContainerCommand {
