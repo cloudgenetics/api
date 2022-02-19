@@ -290,6 +290,12 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		c.Status(http.StatusOK)
 	})
 
+	// Get files in a dataset
+	authorized.GET("/results/:uuid", func(c *gin.Context) {
+		files := listS3Objects(c, db)
+		c.JSON(http.StatusOK, files)
+	})
+
 	// Create USER
 	authorized.POST("/user/register", func(c *gin.Context) {
 		msg := registerUser(c, db)

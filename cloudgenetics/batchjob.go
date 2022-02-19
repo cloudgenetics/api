@@ -3,6 +3,7 @@ package cloudgenetics
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -23,6 +24,7 @@ type Job struct {
 	ContainerCommand []string  `gorm:"-" json:"containerCommand,omitempty"`
 	Command          string    `json:"Command,omitempty"`
 	ResultsDir       string    `json:"resultsDir,omitempty"`
+	CreatedAt        time.Time `json:"created_at,omitempty"`
 	OwnerID          uuid.UUID `gorm:"type:uint" json:"omitempty"`
 	User             User      `gorm:"foreignKey:OwnerID" json:"omitempty"`
 }
@@ -37,6 +39,7 @@ func jobParameters(job *Job) *batch.SubmitJobInput {
 	commands := []*string{}
 	commands = append(commands, aws.String(job.NextflowPipeline))
 	job.ResultsDir = uuid.NewString()
+	job.CreatedAt = time.Now()
 	outdir := "s3://" + os.Getenv("AWS_S3_BUCKET") + "/" + job.ResultsDir
 	commands = append(commands, aws.String("--outdir"))
 	commands = append(commands, aws.String(outdir))
