@@ -278,10 +278,16 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		c.JSON(http.StatusOK, ds)
 	})
 
-	// Get info of jobs
+	// Get job info
 	authorized.GET("/jobs/:uuid", func(c *gin.Context) {
-		files := getJobInfo(c, db)
-		c.JSON(http.StatusOK, files)
+		job := getJobInfo(c, db)
+		c.JSON(http.StatusOK, job)
+	})
+
+	// Get AWS job description
+	authorized.GET("/batchjobs/:uuid", func(c *gin.Context) {
+		job := getJobDescription(c, db)
+		c.JSON(http.StatusOK, job)
 	})
 
 	// Submit job

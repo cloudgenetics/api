@@ -18,7 +18,7 @@ type Job struct {
 	ID               uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"uuid,omitempty"`
 	JobDefinition    string    `json:"jobDefinition"`
 	JobName          string    `json:"jobName"`
-	JobArn           string    `json:"jobArn,omitempty"`
+	JobId            string    `json:"jobId,omitempty"`
 	JobQueue         string    `json:"jobQueue"`
 	NextflowPipeline string    `json:"nextflowPipeline"`
 	ContainerCommand []string  `gorm:"-" json:"containerCommand,omitempty"`
@@ -69,8 +69,8 @@ func submitJob(input *batch.SubmitJobInput) string {
 	if err != nil {
 		log.Print("Submit job: ", err.Error())
 	}
-	job_arn := *result.JobArn
-	return job_arn
+	job_id := *result.JobId
+	return job_id
 }
 
 func submitBatchJob(c *gin.Context, db *gorm.DB) {
@@ -78,7 +78,7 @@ func submitBatchJob(c *gin.Context, db *gorm.DB) {
 	c.BindJSON(&job)
 	job.OwnerID = userid(c, db)
 	params := jobParameters(&job)
-	job.JobArn = submitJob(params)
+	job.JobId = submitJob(params)
 	dbresp := db.Save(&job)
 	if dbresp.Error != nil {
 		log.Print("Create job: ", dbresp.Error)
