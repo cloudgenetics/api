@@ -290,10 +290,16 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		c.Status(http.StatusOK)
 	})
 
-	// Get files in a dataset
+	// Get files in results
 	authorized.GET("/results/:uuid", func(c *gin.Context) {
 		files := listS3Objects(c, db)
 		c.JSON(http.StatusOK, files)
+	})
+
+	// View plots
+	authorized.GET("/results/plots/:uuid", func(c *gin.Context) {
+		plots := getPresignedPlots(c, db)
+		c.JSON(http.StatusOK, plots)
 	})
 
 	// Create USER

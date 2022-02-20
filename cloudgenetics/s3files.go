@@ -1,7 +1,9 @@
 package cloudgenetics
 
 import (
+	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,14 +13,53 @@ import (
 	"gorm.io/gorm"
 )
 
-func listS3Objects(c *gin.Context, db *gorm.DB) []string {
+func getPresignedPlots(c *gin.Context, db *gorm.DB) []string {
+	uuid, _ := uuid.Parse(c.Param("uuid"))
+
+	// Create S3 service client
 	awsregion := os.Getenv("AWS_REGION")
 	sess, _ := session.NewSession(&aws.Config{
 		Region: aws.String(awsregion)},
 	)
+	svc := s3.New(sess)
+	bucket := os.Getenv("AWS_S3_BUCKET")
 
+	params := &s3.ListObjectsInput{
+		Bucket: aws.String(bucket),
+		Prefix: aws.String(uuid.String() + "/123_reads/plots/"),
+	}
+
+	resp, _ := svc.ListObjects(params)
+	files := []string{}
+	for _, key := range resp.Contents {
+		files = append(files, *key.Key)
+	}
+
+	var s3urls []string
+	for i, file := range files {
+		if i > 0 {
+			req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+				Bucket: aws.String(bucket),
+				Key:    aws.String(file),
+			})
+			url, err := req.Presign(15 * time.Minute)
+			if err != nil {
+				log.Println("Failed to sign request", err)
+			}
+			s3urls = append(s3urls, url)
+		}
+	}
+	return s3urls
+}
+
+func listS3Objects(c *gin.Context, db *gorm.DB) []string {
 	uuid, _ := uuid.Parse(c.Param("uuid"))
+
 	// Create S3 service client
+	awsregion := os.Getenv("AWS_REGION")
+	sess, _ := session.NewSession(&aws.Config{
+		Region: aws.String(awsregion)},
+	)
 	svc := s3.New(sess)
 	bucket := os.Getenv("AWS_S3_BUCKET")
 	params := &s3.ListObjectsInput{
