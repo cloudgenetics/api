@@ -302,6 +302,12 @@ func APIV1Routes(r *gin.Engine, db *gorm.DB) {
 		c.JSON(http.StatusOK, plots)
 	})
 
+	// View reports
+	authorized.GET("/results/reports/:uuid", func(c *gin.Context) {
+		reports := getPresignedReports(c, db)
+		c.JSON(http.StatusOK, reports)
+	})
+
 	// Create USER
 	authorized.POST("/user/register", func(c *gin.Context) {
 		msg := registerUser(c, db)
