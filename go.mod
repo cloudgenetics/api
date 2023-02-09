@@ -7,12 +7,10 @@ require (
 	github.com/aws/aws-sdk-go v1.41.19
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
 	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-gonic/gin v1.7.2
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/gin-gonic/gin v1.7.7
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/mattn/go-isatty v0.0.12 // indirect
-	github.com/ugorji/go/codec v1.2.6 // indirect
+	github.com/ugorji/go v1.2.6 // indirect
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/gorm v1.22.4
 )
